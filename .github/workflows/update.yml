@@ -1,0 +1,32 @@
+name: Update M3U Playlist
+
+on:
+  schedule:
+    - cron: '0 3 * * *' # Läuft täglich um 03:00 Uhr
+  workflow_dispatch: # Erlaubt manuelles Starten
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Code holen
+        uses: actions/checkout@v3
+
+      - name: Python Setup
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Tools installieren
+        run: pip install requests beautifulsoup4
+
+      - name: Scrape Moflex
+        run: python z11_scraper.py
+
+      - name: Datei speichern
+        run: |
+          git config --global user.name "Z11-Bot"
+          git config --global user.email "bot@github.com"
+          git add moflex_z11.m3u
+          git commit -m "Automatische Aktualisierung" || exit 0
+          git push
